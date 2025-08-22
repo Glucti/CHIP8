@@ -1,21 +1,12 @@
-chip8: chip8.c
-	cc chip8.c -o chip8
+# chip8: chip8.c
+# 	cc chip8.c -o chip8
 
-# CC := clang
+CC := cc
+CFLAGS := -Wall -Wextra -std=c11 -g $(shell sdl2-config --cflags)
+LDFLAGS := $(shell sdl2-config --libs)
 
-# CFLAGS := $(shell sdl2-config --cflags) -ggdb3 -O0 -std=c11 -Wall
-# LDFLAGS := $(shell sdl2-config --libs)
+chip8: chip8.c chip8.h screen.h
+	$(CC) $(CFLAGS) chip8.c -o chip8 $(LDFLAGS)
 
-# SRCS := screen.c
-
-# OBJS := $(SRCS:.c=.o)
-
-# EXEC := screen
-
-# all: $(EXEC)
-
-# $(EXEC): $(OBJS)
-# 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
-
-# clean:
-# 	rm -f $(OBJS) 
+clean:
+	rm -f chip8

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "chip8.h"
-#include <screen.h>
+#include "screen.h"
 
 
 // 00E0 --> 2 bytes 
@@ -111,54 +111,29 @@ void chip8_decode(chip8* c, uint16_t opcode) {
 }
 
 
+int main() {
 
-int main(void) {
+    SDL_Init(SDL_INIT_VIDEO);
 
-    chip8 chip;
-    chip8_init(&chip);
+    SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
 
-    uint8_t opcodes[] = {
-        0x00, 0xE0,
-        0x1A, 0xBC,
-        0x6A, 0x05
-    };
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    memcpy(&chip.memory[ENTRY], opcodes, sizeof(opcodes));
+    int running = 1;
+    SDL_Event e;
 
-
-    for (int i = 0; i < 3; i++) {
-        uint16_t fetched = chip8_fetch(&chip);
-
-        chip8_decode(&chip, fetched);
+    while (running) {
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                running = 0;
+            }
+        }
+        drawScreen(renderer);
+        SDL_Delay(16);
     }
 
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }
-
-
-// int main() {
-
-//     SDL_Init(SDL_INIT_VIDEO);
-
-//     SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
-
-//     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-//     int running = 1;
-//     SDL_Event e;
-
-//     while (running) {
-//         while (SDL_PollEvent(&e)) {
-//             if (e.type == SDL_QUIT) {
-//                 running = 0;
-//             }
-//         }
-//         drawScreen(renderer);
-//         SDL_Delay(16);
-//     }
-
-//     SDL_DestroyRenderer(renderer);
-//     SDL_DestroyWindow(window);
-//     SDL_Quit();
-//     return 0;
-// }
