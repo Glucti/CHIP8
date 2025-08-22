@@ -2,44 +2,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
-#define SCR_SCALE 20
-
-#define MEM_SIZE 4069
-#define STACK_DEPTH 16
-#define ENTRY 0x200
-
-typedef struct chip8 {
-    uint8_t memory[MEM_SIZE];
-    uint16_t stack[STACK_DEPTH];
-
-    uint16_t PC; // program counter
-    uint8_t SP; // stack pointer
-
-    uint16_t V[16];
-    uint16_t I; // index register
-
-    uint8_t screen[32][64];
-} chip8;
-
-const uint8_t sprites[80] = {
-    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-    0x20, 0x60, 0x20, 0x20, 0x70, // 1
-    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
-};
+#include "chip8.h"
+#include <screen.h>
 
 
 // 00E0 --> 2 bytes 
@@ -64,7 +28,7 @@ void chip8_init(chip8* c) {
 void drawSprite(uint8_t x, uint8_t y, uint8_t n, chip8* c) {
     c->V[0xF] = 0; // set the collision flag to 0
     for (int row = 0; row < n; row++) {
-        uint8_t sprite = c->memory[c->I + row]; // sprite starts at I so...
+        uint8_t sprite = c->memory[c->I + row]; 
         for (int column = 0; column < 8; column++) {
             if (sprite & (0x80 >> column)) { // 1000 0000 -> 0100 0000 -> etc
                 int px = (c->V[x] + column);
@@ -75,7 +39,6 @@ void drawSprite(uint8_t x, uint8_t y, uint8_t n, chip8* c) {
 
                 c->screen[py][px] ^=1; // xor screen
             }
-
         }
     }
 }
@@ -121,6 +84,15 @@ void chip8_decode(chip8* c, uint16_t opcode) {
             break;
         }
 
+        case 0xA000: {
+            uint8_t val = (opcode & 0x0FFF);
+
+            printf("Setting reg I to %03X\n", val);
+
+            c->I = val;
+            break;
+        }
+
         case 0XD000: {
             printf("DRW\n");
 
@@ -162,3 +134,31 @@ int main(void) {
 
     return 0;
 }
+
+
+// int main() {
+
+//     SDL_Init(SDL_INIT_VIDEO);
+
+//     SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+
+//     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+//     int running = 1;
+//     SDL_Event e;
+
+//     while (running) {
+//         while (SDL_PollEvent(&e)) {
+//             if (e.type == SDL_QUIT) {
+//                 running = 0;
+//             }
+//         }
+//         drawScreen(renderer);
+//         SDL_Delay(16);
+//     }
+
+//     SDL_DestroyRenderer(renderer);
+//     SDL_DestroyWindow(window);
+//     SDL_Quit();
+//     return 0;
+// }
