@@ -45,4 +45,13 @@ const uint8_t sprites[80] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
+typedef struct {
+    uint16_t opcode;
+    uint16_t NNN;
+    uint8_t NN;
+    uint8_t N;
+    uint8_t X;
+    uint8_t Y;
+} instruction_t;
+
 #endif

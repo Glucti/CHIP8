@@ -45,8 +45,30 @@ void drawSprite(uint8_t x, uint8_t y, uint8_t n, chip8* c) {
     }
 }
 
+
+instruction_t decode_opcode(uint16_t opcode) {
+
+    uint16_t NNN = (opcode & 0xFFF);
+    uint8_t NN = (opcode & 0x00FF);
+    uint8_t N = (opcode & 0x000F);
+    uint8_t X = (opcode & 0x0F00) >> 8;
+    uint8_t Y = (opcode & 0x00F0) >> 4;
+
+    instruction_t inst;
+    inst.opcode = opcode,
+    inst.NNN = NNN;
+    inst.NN = NN;
+    inst.N = N;
+    inst.X = X;
+    inst.Y = Y;
+
+    return inst;
+}
+
 // a2e0 -> xxxx xxxx xxxx xxxx
 void chip8_decode(chip8* c, uint16_t opcode) {
+
+    instruction_t i = decode_opcode(opcode);
     switch(opcode & 0xF000) {
         case 0x0000:
             switch(opcode) {
@@ -54,59 +76,115 @@ void chip8_decode(chip8* c, uint16_t opcode) {
                     memset(c->screen, 0, sizeof c->screen);
                     printf("CLS\n");
                     break;
-                case 0x00EE:
+                case 0x00EE: // pop the last address from stack and set the PC to it
                     printf("RET\n");
+                    c->SP--;
+                    c->PC = c->stack[c->SP];
                     break;
                 default:
                     printf("SYS add -> ignored\n");
                     break;
             }
             break;
+        case 0x2000: {
+            c->stack[c->SP] = c->PC;
+            c->SP++;
+            c->PC = i.NNN;
+            break;
+        }
         case 0x1000: {
-            uint16_t address = opcode & 0x0FFF;
-            printf("JMP to address 0x%03X\n", address);
-            c->PC = address;
+            c->PC = i.NNN;
             break;
         }
-
+        case 0x3000: {
+            if (c->V[i.X] == i.NN) {
+                c->PC += 2;
+            } 
+            break;
+        }
+        case 0x4000: {
+            if (c->V[i.X] != i.NN) {
+                c->PC += 2;
+            }
+            break;
+        }
+        case 0x5000: {
+            if (c->V[i.X] == c->V[i.Y]) {
+                c->PC += 2;
+            }
+            break;
+        }
+        case 0x9000: {
+            if (c->V[i.X] != c->V[i.Y]) {
+                c->PC += 2;
+            }
+            break;
+        }
         case 0x6000: {
-            uint8_t reg = (opcode & 0x0F00) >> 8;
-            uint8_t val = (opcode & 0x00FF);
-
-            printf("Register V[%x] -> val %u\n", reg, val);
-            c->V[reg] = val;
+            c->V[i.X] = i.NN;
             break;
         }
-
         case 0x7000: {
-            uint8_t reg = (opcode & 0x0F00) >> 8;
-            uint8_t val = (opcode & 0x00FF);
-
-            printf("Adding to reg V[%x] -> val %u\n", reg, val);
-            c->V[reg] += val;
+            c->V[i.X] += i.NN;
             break;
         }
-
+        case 0x8000: {
+            switch(i.N) {
+                case 0: {
+                    c->V[i.X] = c->V[i.Y];
+                    break;
+                }
+                case 1: {
+                    c->V[i.X] |= c->V[i.Y];
+                    break;
+                }
+                case 2: {
+                    c->V[i.X] &= c->V[i.Y];
+                    break;
+                }
+                case 3: {
+                    c->V[i.X] ^= c->V[i.Y];
+                    break;
+                }
+                case 4: {
+                    uint16_t sum = c->V[i.X] + c->V[i.Y];
+                    c->V[0xF] = (sum > 0xFF);
+                    c->V[i.X] = (uint8_t)sum;
+                    break;
+                }
+                case 5: {
+                    c->V[0xF] = (c->V[i.X] >= c->V[i.Y]) ? 1 : 0;
+                    c->V[i.X] -= c->V[i.Y];
+                    break;
+                }
+                case 6: {
+                    c->V[i.X] = c->V[i.Y];
+                    c->V[0xF] = c->V[i.Y] & 0x1;
+                    c->V[i.X] >>= 1;
+                    break;
+                }
+                case 7: {
+                    c->V[0xF] = (c->V[i.Y] >= c->V[i.X]) ? 1 : 0;
+                    c->V[i.X] = c->V[i.Y] - c->V[i.X];
+                    break;
+                }
+                case 0xE: {
+                    c->V[i.X] = c->V[i.Y];
+                    c->V[0xF] = (c->V[i.Y] & 0x80) >> 7;
+                    c->V[i.X] <<= 1;
+                    break;
+                }
+            }
+            break;
+        }
         case 0xA000: {
-            uint16_t val = (opcode & 0x0FFF);
-
-            printf("Setting reg I to %03X\n", val);
-
-            c->I = val;
+            c->I = i.NNN;
             break;
         }
-
         case 0XD000: {
-            printf("DRW\n");
-
-            uint8_t x = (opcode & 0x0F00) >> 8;
-            uint8_t y = (opcode & 0x00F0) >> 4;
-            uint8_t n = (opcode & 0x000F);
-
-            drawSprite(x, y, n, c);
+            drawSprite(i.X, i.Y, i.N, c);
             break;
         }
-
         default:
             printf("INVALID OPCODE\n");
             break;
@@ -136,7 +214,6 @@ int read_f_into_entry(const char* path, chip8* c) {
     c->PC = ENTRY;
     return 1;
 }
-
 
 
 int main() {
