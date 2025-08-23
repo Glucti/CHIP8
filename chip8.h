@@ -1,3 +1,4 @@
+// chip8.h
 #ifndef CHIP8_H
 #define CHIP8_H
 
@@ -5,12 +6,12 @@
 
 #define SCR_SCALE 20
 
-#define MEM_SIZE 4069
+#define MEM_SIZE 4096
 #define STACK_DEPTH 16
 #define ENTRY 0x200
 
-#define WIDTH_SCREEN 32
-#define HEIGHT_SCREEN 64
+#define HEIGHT_SCREEN 32
+#define WIDTH_SCREEN 64
 
 typedef struct chip8 {
     uint8_t memory[MEM_SIZE];

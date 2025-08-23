@@ -14,9 +14,9 @@ void drawScreen(SDL_Renderer* renderer, chip8* c) {
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // white
 
-    for (int x = 0; x < WIDTH_SCREEN; x++) {
-        for (int y = 0; y < HEIGHT_SCREEN; y++) {
-            if (c->screen[x][y]) {
+    for (int y = 0; y < HEIGHT_SCREEN; y++) {
+        for (int x = 0; x <WIDTH_SCREEN; x++) {
+            if (c->screen[y][x]) {
                 SDL_Rect rect = {x * SCR_SCALE, y * SCR_SCALE, SCR_SCALE, SCR_SCALE};
                 SDL_RenderDrawRect(renderer, &rect);
                 SDL_RenderFillRect(renderer, &rect);

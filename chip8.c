@@ -1,3 +1,4 @@
+// chip8.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -25,14 +26,15 @@ void chip8_init(chip8* c) {
     }
 }
 
+// uint8_t screen[32][64];
 void drawSprite(uint8_t x, uint8_t y, uint8_t n, chip8* c) {
     c->V[0xF] = 0; // set the collision flag to 0
     for (int row = 0; row < n; row++) {
         uint8_t sprite = c->memory[c->I + row]; 
         for (int column = 0; column < 8; column++) {
             if (sprite & (0x80 >> column)) { // 1000 0000 -> 0100 0000 -> etc
-                int px = (c->V[x] + column);
-                int py = (c->V[y] + row);
+                int px = (c->V[x] + column) % WIDTH_SCREEN;
+                int py = (c->V[y] + row) % HEIGHT_SCREEN;
 
                 if (c->screen[py][px])
                     c->V[0xF] = 1;
@@ -49,6 +51,7 @@ void chip8_decode(chip8* c, uint16_t opcode) {
         case 0x0000:
             switch(opcode) {
                 case 0x00E0:
+                    memset(c->screen, 0, sizeof c->screen);
                     printf("CLS\n");
                     break;
                 case 0x00EE:
@@ -85,7 +88,7 @@ void chip8_decode(chip8* c, uint16_t opcode) {
         }
 
         case 0xA000: {
-            uint8_t val = (opcode & 0x0FFF);
+            uint16_t val = (opcode & 0x0FFF);
 
             printf("Setting reg I to %03X\n", val);
 
@@ -110,13 +113,43 @@ void chip8_decode(chip8* c, uint16_t opcode) {
     }
 }
 
+int read_f_into_entry(const char* path, chip8* c) {
+    FILE *fp = fopen(path, "rb");
+    if (!fp) {
+        perror("Failed to open ROM");
+        return 0;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+    rewind(fp);
+
+    if (size > (MEM_SIZE - ENTRY)) {
+        fprintf(stderr, "ROM too big\n");
+        fclose(fp);
+        return 0;
+    }
+
+    fread(&c->memory[ENTRY], 1, size, fp);
+    fclose(fp);
+
+    c->PC = ENTRY;
+    return 1;
+}
+
 
 
 int main() {
   chip8 chip;
+  chip8_init(&chip);
+
+  // load fonts 
+  for (int i = 0; i < 80; i++) chip.memory[i] = sprites[i];
+
+  if (!read_f_into_entry("1-chip8-logo.ch8", &chip)) return 1;
 
   SDL_Init(SDL_INIT_VIDEO);
-  SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_SCREEN, HEIGHT_SCREEN, SDL_WINDOW_SHOWN);
+  SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_SCREEN * SCR_SCALE, HEIGHT_SCREEN * SCR_SCALE, SDL_WINDOW_SHOWN);
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
   int running = 1;
@@ -128,6 +161,12 @@ int main() {
               running = 0;
           }
       }
+
+      for (int i = 0; i < 10; i++) {
+        uint16_t op = chip8_fetch(&chip);
+        chip8_decode(&chip, op);
+      }
+
       drawScreen(renderer, &chip);
       SDL_Delay(16);
   }
