@@ -111,29 +111,29 @@ void chip8_decode(chip8* c, uint16_t opcode) {
 }
 
 
+
 int main() {
+  chip8 chip;
 
-    SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_SCREEN, HEIGHT_SCREEN, SDL_WINDOW_SHOWN);
+  SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+  int running = 1;
+  SDL_Event e;
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  while (running) {
+      while (SDL_PollEvent(&e)) {
+          if (e.type == SDL_QUIT) {
+              running = 0;
+          }
+      }
+      drawScreen(renderer, &chip);
+      SDL_Delay(16);
+  }
 
-    int running = 1;
-    SDL_Event e;
-
-    while (running) {
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) {
-                running = 0;
-            }
-        }
-        drawScreen(renderer);
-        SDL_Delay(16);
-    }
-
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return 0;
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  SDL_Quit();
+  return 0;
 }
