@@ -17,12 +17,12 @@ typedef struct chip8 {
     uint8_t memory[MEM_SIZE];
     uint16_t stack[STACK_DEPTH];
 
-    uint16_t PC; // program counter
-    uint8_t SP; // stack pointer
-    uint8_t V[16];
-    uint16_t I; // index register
-    uint8_t ST; // sound timer 
-    uint8_t DT; // delay timer
+    uint16_t PC;    // program counter
+    uint8_t SP;     // stack pointer
+    uint8_t V[16];  // 16 gen purpose registers 
+    uint16_t I;     // index register
+    uint8_t ST;     // sound timer 
+    uint8_t DT;     // delay timer
 
     uint8_t screen[32][64];
     uint8_t keypad[16];
@@ -55,46 +55,6 @@ typedef struct {
     uint8_t X;
     uint8_t Y;
 } instruction_t;
-
-// family handlers
-void op_0_family(chip8*, instruction_t);
-void op_1NNN(chip8*, instruction_t);
-void op_2NNN(chip8*, instruction_t);
-void op_3XNN(chip8*, instruction_t);
-void op_4XNN(chip8*, instruction_t);
-void op_5XY0(chip8*, instruction_t);
-void op_6XNN(chip8*, instruction_t);
-void op_7XNN(chip8*, instruction_t);
-void op_8_family(chip8*, instruction_t);
-void op_9XY0(chip8*, instruction_t);
-void op_ANNN(chip8*, instruction_t);
-void op_BNNN(chip8*, instruction_t);
-void op_CXNN(chip8*, instruction_t);
-void op_DXYN(chip8*, instruction_t);
-void op_E_family(chip8*, instruction_t);
-void op_F_family(chip8*, instruction_t);
-
-void op_8XY0(chip8*, instruction_t);
-void op_8XY1(chip8*, instruction_t);
-void op_8XY2(chip8*, instruction_t);
-void op_8XY3(chip8*, instruction_t);
-void op_8XY4(chip8*, instruction_t);
-void op_8XY5(chip8*, instruction_t);
-void op_8XY6(chip8*, instruction_t);
-void op_8XY7(chip8*, instruction_t);
-void op_8XYE(chip8*, instruction_t);
-
-void op_EX9E(chip8*, instruction_t);
-void op_EXA1(chip8*, instruction_t);
-void op_FX07(chip8*, instruction_t);
-void op_FX0A(chip8*, instruction_t);
-void op_FX15(chip8*, instruction_t);
-void op_FX18(chip8*, instruction_t);
-void op_FX1E(chip8*, instruction_t);
-void op_FX29(chip8*, instruction_t);
-void op_FX33(chip8*, instruction_t);
-void op_FX55(chip8*, instruction_t);
-void op_FX65(chip8*, instruction_t);
 
 
 #endif

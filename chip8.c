@@ -8,6 +8,46 @@
 #include "screen.h"
 
 
+// family handlers
+void op_0_family(chip8*, instruction_t);
+void op_1NNN(chip8*, instruction_t);
+void op_2NNN(chip8*, instruction_t);
+void op_3XNN(chip8*, instruction_t);
+void op_4XNN(chip8*, instruction_t);
+void op_5XY0(chip8*, instruction_t);
+void op_6XNN(chip8*, instruction_t);
+void op_7XNN(chip8*, instruction_t);
+void op_8_family(chip8*, instruction_t);
+void op_9XY0(chip8*, instruction_t);
+void op_ANNN(chip8*, instruction_t);
+void op_BNNN(chip8*, instruction_t);
+void op_CXNN(chip8*, instruction_t);
+void op_DXYN(chip8*, instruction_t);
+void op_E_family(chip8*, instruction_t);
+void op_F_family(chip8*, instruction_t);
+
+void op_8XY0(chip8*, instruction_t);
+void op_8XY1(chip8*, instruction_t);
+void op_8XY2(chip8*, instruction_t);
+void op_8XY3(chip8*, instruction_t);
+void op_8XY4(chip8*, instruction_t);
+void op_8XY5(chip8*, instruction_t);
+void op_8XY6(chip8*, instruction_t);
+void op_8XY7(chip8*, instruction_t);
+void op_8XYE(chip8*, instruction_t);
+
+void op_EX9E(chip8*, instruction_t);
+void op_EXA1(chip8*, instruction_t);
+void op_FX07(chip8*, instruction_t);
+void op_FX0A(chip8*, instruction_t);
+void op_FX15(chip8*, instruction_t);
+void op_FX18(chip8*, instruction_t);
+void op_FX1E(chip8*, instruction_t);
+void op_FX29(chip8*, instruction_t);
+void op_FX33(chip8*, instruction_t);
+void op_FX55(chip8*, instruction_t);
+void op_FX65(chip8*, instruction_t);
+
 void chip8_init(chip8* c) {
     memset(c, 0, sizeof(chip8));
     memset(c->keypad, 0, sizeof c->keypad);
@@ -57,6 +97,7 @@ instruction_t decode_opcode(uint16_t opcode) {
 }
 
 // opcode table
+typedef void (*op_handler)(chip8* c, instruction_t i);
 
 op_handler main_table[16] = {
     op_0_family,  
@@ -77,7 +118,7 @@ op_handler main_table[16] = {
     op_F_family   
 };
 
-typedef void (*op_handler)(chip8* c, instruction_t i);
+
 
 
 void op_0_family(chip8* c, instruction_t i) {
@@ -350,13 +391,15 @@ void chip8_timers(chip8* c) {
 }
 
 
+
+
 int main() {
   chip8 chip;
   chip8_init(&chip);
   srand((unsigned)time(NULL));
 
 
-  if (!read_f_into_entry("petdog.ch8", &chip)) return 1;
+  if (!read_f_into_entry("1dcell.ch8", &chip)) return 1;
 
   SDL_Init(SDL_INIT_VIDEO);
   SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_SCREEN * SCR_SCALE, HEIGHT_SCREEN * SCR_SCALE, SDL_WINDOW_SHOWN);
