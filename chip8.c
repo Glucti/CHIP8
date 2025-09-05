@@ -1,4 +1,3 @@
-// chip8.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -7,8 +6,7 @@
 #include <time.h>
 #include "screen.h"
 
-
-// family handlers
+// handlers
 void op_0_family(chip8*, instruction_t);
 void op_1NNN(chip8*, instruction_t);
 void op_2NNN(chip8*, instruction_t);
@@ -117,9 +115,6 @@ op_handler main_table[16] = {
     op_E_family,  
     op_F_family   
 };
-
-
-
 
 void op_0_family(chip8* c, instruction_t i) {
     switch (i.NN) {
@@ -337,10 +332,6 @@ void op_FX65(chip8* c, instruction_t i) {
     }
 }
 
-
-
-// 00E0 --> 2 bytes 
-// 2F E0 -> 0000 002F  0000 00E0 -> 2FE0 0000 
 void chip8_fetch_decode(chip8* c) {
     uint16_t opcode = (c->memory[c->PC] << 8) | c->memory[c->PC + 1];
 
@@ -391,15 +382,13 @@ void chip8_timers(chip8* c) {
 }
 
 
-
-
 int main() {
   chip8 chip;
   chip8_init(&chip);
   srand((unsigned)time(NULL));
 
 
-  if (!read_f_into_entry("1dcell.ch8", &chip)) return 1;
+  if (!read_f_into_entry("caveexplorer.ch8", &chip)) return 1;
 
   SDL_Init(SDL_INIT_VIDEO);
   SDL_Window* window = SDL_CreateWindow("CHIP8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_SCREEN * SCR_SCALE, HEIGHT_SCREEN * SCR_SCALE, SDL_WINDOW_SHOWN);
